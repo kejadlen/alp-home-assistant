@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "./dist",
+
+    "sourceMap": true,
+    "inlineSources": true,
+    "sourceRoot": "/",
 
     "strict": true,
 
@@ -16,6 +21,6 @@
 
     "forceConsistentCasingInFileNames": true
   },
-  "include": [ "src/**/*" ],
+  "include": [ "./src/**/*" ],
   "exclude": [".DS_Store"]
 }
