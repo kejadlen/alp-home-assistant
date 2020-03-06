@@ -1,2 +1,2 @@
-# alpHomeAssistant (alpHA)
+# alp-home-assistant (alpHA)
 
