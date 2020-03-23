@@ -31,21 +31,9 @@ class HomeAssistant {
     ws.on("message", (data) => {
       this.id += 1;
 
-      const decodeMessage: (json: unknown) => Either<Error, Message> = (json) =>
-        pipe(
-          Message.decode(json),
-          mapLeft((errors) => {
-            const subErrors = failure(errors).map((e) => `  - ${e}`);
-            const message = [`Unable to parse '${data}'`]
-              .concat(subErrors)
-              .join("\n");
-            return new Error(message);
-          }),
-        );
-
       const decoded = pipe(
         parseJSON(data.toString(), toError),
-        chain(decodeMessage),
+        chain(this.decodeMessage),
       );
 
       if (isLeft(decoded)) {
@@ -73,6 +61,19 @@ class HomeAssistant {
           throw new Error("unreachable!");
       }
     });
+  }
+
+  private decodeMessage(json: unknown): Either<Error, Message> {
+    return pipe(
+      Message.decode(json),
+      mapLeft((errors) => {
+        const subErrors = failure(errors).map((e) => `  - ${e}`);
+        const message = [`Unable to decode '${json}'`]
+          .concat(subErrors)
+          .join("\n");
+        return new Error(message);
+      }),
+    );
   }
 }
 
