@@ -6,23 +6,31 @@ import { Observable, fromEventPattern } from "rxjs";
 
 import { Event, EventStateChanged, HomeAssistant } from "./ha";
 
-const ha_url = process.env.HA_URL!;
-const ha_access_token = process.env.HA_ACCESS_TOKEN!;
-const sentry_dsn = process.env.SENTRY_DSN;
+function fetchEnv(key: string): string {
+  const value = process.env[key];
+  if (value === undefined) {
+    throw new Error("Expected environment variable `${key}` to exist");
+  }
+  return value;
+}
 
-var captureException: (e: Error) => void = console.debug;
-if (sentry_dsn) {
+const haUrl = fetchEnv("HA_URL");
+const haAccessToken = fetchEnv("HA_ACCESS_TOKEN");
+const sentryDsn = process.env.SENTRY_DSN;
+
+let captureException: (e: Error) => void = console.debug;
+if (sentryDsn) {
   const rootDir = __dirname || process.cwd();
 
   Sentry.init({
-    dsn: sentry_dsn,
+    dsn: sentryDsn,
     integrations: [new RewriteFrames({ root: rootDir })],
   });
 
   captureException = Sentry.captureException
 }
 
-const ha = new HomeAssistant(ha_url, ha_access_token);
+const ha = new HomeAssistant(haUrl, haAccessToken);
 
 const separated: Separated<Observable<Error>, Observable<Event>> = observable.separate(
   fromEventPattern(ha.subscribe.bind(ha))

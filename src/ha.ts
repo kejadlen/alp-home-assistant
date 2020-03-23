@@ -9,14 +9,14 @@ const EntityState = t.type({
 });
 
 const EventCallService = t.type({
-  event_type: t.literal("call_service"),
+  event_type: t.literal("call_service"), // eslint-disable-line @typescript-eslint/camelcase
 });
 const EventStateChanged = t.type({
-  event_type: t.literal("state_changed"),
+  event_type: t.literal("state_changed"), // eslint-disable-line @typescript-eslint/camelcase
   data: t.type({
-    entity_id: t.string,
-    old_state: EntityState,
-    new_state: EntityState,
+    entity_id: t.string,    // eslint-disable-line @typescript-eslint/camelcase
+    old_state: EntityState, // eslint-disable-line @typescript-eslint/camelcase
+    new_state: EntityState, // eslint-disable-line @typescript-eslint/camelcase
   }),
 });
 type EventStateChanged = t.TypeOf<typeof EventStateChanged>;
@@ -29,14 +29,29 @@ type Event = t.TypeOf<typeof Event>;
 
 type EventCallback = (result: Either<Error, Event>) => void;
 
+const Message = t.union([
+  t.type({
+    type: t.keyof({
+      "auth_required": null,
+      "auth_ok": null,
+      "result": null,
+    }),
+  }),
+  t.type({
+    type: t.literal("event"),
+    event: Event,
+  }),
+]);
+type Message = t.TypeOf<typeof Message>;
+
 class HomeAssistant {
   url: string;
-  access_token: string;
+  accessToken: string;
   id = 0;
 
-  constructor(url: string, access_token: string) {
+  constructor(url: string, accessToken: string) {
     this.url = url;
-    this.access_token = access_token;
+    this.accessToken = accessToken;
   }
 
   subscribe(callback: EventCallback): void {
@@ -44,7 +59,7 @@ class HomeAssistant {
     ws.on("message", data => {
       this.id += 1;
 
-      const decodeMessage = (json: unknown) => pipe(
+      const decodeMessage: (json: unknown) => Either<Error, Message> = json => pipe(
         Message.decode(json),
         mapLeft(errors => {
           const subErrors = failure(errors).map(e => `  - ${e}`);
@@ -66,7 +81,8 @@ class HomeAssistant {
       const message = decoded.right;
       switch(message.type) {
         case "auth_required":
-          ws.send(JSON.stringify({ type: "auth", access_token: this.access_token }));
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          ws.send(JSON.stringify({ type: "auth", access_token: this.accessToken }));
           return;
         case "auth_ok":
           ws.send(JSON.stringify({ id: this.id, type: "subscribe_events" }));
@@ -82,20 +98,5 @@ class HomeAssistant {
     });
   }
 }
-
-const Message = t.union([
-  t.type({
-    type: t.keyof({
-      "auth_required": null,
-      "auth_ok": null,
-      "result": null,
-    }),
-  }),
-  t.type({
-    type: t.literal("event"),
-    event: Event,
-  }),
-]);
-type Message = t.TypeOf<typeof Message>;
 
 export { Event, EventStateChanged, HomeAssistant };

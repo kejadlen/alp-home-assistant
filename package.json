@@ -8,6 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "concurrently \"yarn:watch-build\" \"yarn:watch-start\"",
+    "lint": "eslint . --ext .ts",
     "start": "node dist/index.js",
     "watch-build": "tsc --watch",
     "watch-start": "nodemon --watch dist ./dist/index.js"
@@ -24,7 +25,10 @@
   "devDependencies": {
     "@types/uuid": "^7.0.0",
     "@types/ws": "^7.2.2",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
     "concurrently": "^5.1.0",
+    "eslint": "^6.8.0",
     "nodemon": "^2.0.2",
     "typescript": "^3.8.3"
   }
