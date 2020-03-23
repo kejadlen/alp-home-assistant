@@ -17,9 +17,9 @@ import { Event, EventStateChanged, Message } from "./haTypes";
 type EventCallback = (result: Either<Error, Event>) => void;
 
 class HomeAssistant {
-  url: string;
-  accessToken: string;
-  id = 0;
+  private url: string;
+  private accessToken: string;
+  private id = 0;
 
   constructor(url: string, accessToken: string) {
     this.url = url;
