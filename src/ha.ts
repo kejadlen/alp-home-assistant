@@ -9,46 +9,12 @@ import {
   right,
   toError,
 } from "fp-ts/lib/Either";
-import * as t from "io-ts";
 import { failure } from "io-ts/lib/PathReporter";
 import WebSocket from "ws";
 
-const EntityState = t.type({
-  state: t.string,
-});
-
-const EventCallService = t.type({
-  event_type: t.literal("call_service"), // eslint-disable-line @typescript-eslint/camelcase
-});
-const EventStateChanged = t.type({
-  event_type: t.literal("state_changed"), // eslint-disable-line @typescript-eslint/camelcase
-  data: t.type({
-    entity_id: t.string, // eslint-disable-line @typescript-eslint/camelcase
-    old_state: EntityState, // eslint-disable-line @typescript-eslint/camelcase
-    new_state: EntityState, // eslint-disable-line @typescript-eslint/camelcase
-  }),
-});
-type EventStateChanged = t.TypeOf<typeof EventStateChanged>;
-
-const Event = t.union([EventCallService, EventStateChanged]);
-type Event = t.TypeOf<typeof Event>;
+import { Event, EventStateChanged, Message } from "./haTypes";
 
 type EventCallback = (result: Either<Error, Event>) => void;
-
-const Message = t.union([
-  t.type({
-    type: t.keyof({
-      auth_required: null,
-      auth_ok: null,
-      result: null,
-    }),
-  }),
-  t.type({
-    type: t.literal("event"),
-    event: Event,
-  }),
-]);
-type Message = t.TypeOf<typeof Message>;
 
 class HomeAssistant {
   url: string;
@@ -90,8 +56,8 @@ class HomeAssistant {
       const message = decoded.right;
       switch (message.type) {
         case "auth_required":
-          // eslint-disable-next-line @typescript-eslint/camelcase
           ws.send(
+            // eslint-disable-next-line @typescript-eslint/camelcase
             JSON.stringify({ type: "auth", access_token: this.accessToken }),
           );
           return;
