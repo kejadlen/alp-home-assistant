@@ -27,14 +27,15 @@ if (sentryDsn) {
     integrations: [new RewriteFrames({ root: rootDir })],
   });
 
-  captureException = Sentry.captureException
+  captureException = Sentry.captureException;
 }
 
 const ha = new HomeAssistant(haUrl, haAccessToken);
 
-const separated: Separated<Observable<Error>, Observable<Event>> = observable.separate(
-  fromEventPattern(ha.subscribe.bind(ha))
-);
+const separated: Separated<
+  Observable<Error>,
+  Observable<Event>
+> = observable.separate(fromEventPattern(ha.subscribe.bind(ha)));
 
 const errors = separated.left;
 errors.subscribe(captureException);
@@ -46,11 +47,12 @@ function isStateChanged(e: Event): e is EventStateChanged {
 }
 const stateChanges = observable.filter(events, isStateChanged);
 
-const guestMode = observable.filter(stateChanges, e => e.data.entity_id == "input_boolean.guest_mode");
+const guestMode = observable.filter(
+  stateChanges,
+  (e) => e.data.entity_id == "input_boolean.guest_mode",
+);
 
 guestMode.subscribe(console.debug);
-
-
 
 // const guestMode = stateChanged.pipe(filter(event => event.data.entity_id == "input_boolean.guest_mode"));
 
